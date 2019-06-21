@@ -17,6 +17,7 @@ defmodule BillWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    resources "/bills", BillController
   end
 
   # Other scopes may use custom stacks.
