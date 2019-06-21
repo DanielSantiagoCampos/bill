@@ -43,4 +43,9 @@ defmodule BillWeb.Endpoint do
     signing_salt: "tC+6m3/T"
 
   plug BillWeb.Router
+
+  plug Plug.Parsers,
+    parsers: [:urlencoded, :multipart, :json],
+    pass: ["*/*"],
+    json_decoder: Phoenix.json_library()
 end

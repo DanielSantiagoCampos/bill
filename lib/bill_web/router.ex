@@ -18,6 +18,7 @@ defmodule BillWeb.Router do
 
     get "/", PageController, :index
     resources "/bills", BillController
+    post "/upload_csv", BillController, :csv
   end
 
   # Other scopes may use custom stacks.

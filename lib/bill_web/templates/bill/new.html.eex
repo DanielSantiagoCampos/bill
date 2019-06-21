@@ -1,0 +1,12 @@
+<section>
+  <h1> Load Csv File</h1>
+  <%= form_for @conn, "/upload_csv", [as: :upload, multipart: true], fn f -> %>
+    <div>
+      <%= file_input f, :csv %>
+    </div>
+    <div>
+      <%= submit "submit" %>
+    </div>
+  <%end%>
+</section>
+
