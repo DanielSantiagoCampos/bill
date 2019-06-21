@@ -7,6 +7,12 @@
 # General application configuration
 use Mix.Config
 
+config :bill, Bill.Repo,
+  database: "bill_repo",
+  username: "user",
+  password: "pass",
+  hostname: "localhost"
+
 config :bill,
   ecto_repos: [Bill.Repo]
 
