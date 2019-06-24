@@ -1,8 +1,5 @@
 defmodule Bill.Bill do
   use Ecto.Schema
-# alias Bill.Repo
-# alias Bill.Bill
-# alias Bill.Item
 
   schema "bills" do
     field :number_bill,        :string

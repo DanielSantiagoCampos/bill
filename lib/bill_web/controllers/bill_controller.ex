@@ -7,9 +7,8 @@ defmodule BillWeb.BillController do
     render conn, "new.html"
   end
 
-  def csv(conn, %{"upload" => upload}) do
+  def create(conn, %{"upload" => upload}) do
     %{"upload" => plug} = upload
-   #IO.inspect(BillCreator.create_bill(plug))
     case BillCreator.create_bill(plug) do
       [ok: message] ->
         conn
@@ -20,8 +19,5 @@ defmodule BillWeb.BillController do
         |> put_flash(:info, error)
         |> redirect(to: Routes.bill_path(conn, :new))
     end
-  end
-
-  def create(conn, %{"upload" => upload}) do
   end
 end

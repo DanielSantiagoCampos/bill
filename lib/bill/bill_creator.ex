@@ -32,7 +32,6 @@ defmodule BillCreator do
   end
 
   def prepare_bill(bill_decode, filename) do
-    IO.inspect(prepare_header(bill_decode, filename))
     prepare_header(bill_decode, filename)
   end
 
@@ -134,22 +133,5 @@ defmodule BillCreator do
       :global_error     -> "The file #{error_struct.file_name} has an error, plis check it."
     end
     [error: handle_error.(error_type)]
-  end
-
-  # find index
-  def find_index(collection, function) do
-    do_find_indexes(collection, function, 1, [])
-  end
-
-  def do_find_indexes([], _function, _counter, acc) do
-    Enum.reverse(acc)
-  end
-
-  def do_find_indexes([h|t], function, counter, acc) do
-    if function.(h) do
-      do_find_indexes(t, function, counter + 1, [counter|acc])
-    else
-      do_find_indexes(t, function, counter + 1, acc)
-    end
   end
 end

@@ -1,7 +1,5 @@
 defmodule Bill.Item do
   use Ecto.Schema
-# alias Bill.Repo
-# alias Bill.Item
 
   schema "items" do
     field :code, :string
