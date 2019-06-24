@@ -97,7 +97,7 @@ defmodule BillCreator do
   def save_values(values, filename) do
     case Enum.uniq(Keyword.keys(Enum.map(values, &save_bill/1))) do
       [:ok] ->
-        [ok: "All bills created successfully"]
+        [ok: "All bills created successfully."]
       [error: error] ->
         [error: error]
     end
