@@ -13,13 +13,9 @@ defmodule Bill.Bill do
   end
 
   def create_bill(params \\ %{}) do
-    case Bill.Bill.changeset(%Bill.Bill{}, params) do
-      {:ok, bill} ->
-        bill
-          |> Bill.Repo.insert
-      {:error, changeset} ->
-        {:error, changeset}
-    end
+    %Bill.Bill{}
+      |> Bill.Bill.changeset(params)
+      |> Bill.Repo.insert
   end
 
   def changeset(bill, params \\ %{}) do

@@ -1,2 +1,5 @@
-number_bill, clients_first_name, clients_last_name, id_client, item_code, item_description, item_quantity, item_price, discount_percentage
-2,           santiago,           pineros,                   2,                 description,             2,          2,                  10
+number_bill, clients_first_name, clients_last_name, id_client, code, description, quantity, price, discount_percentage
+2,                     santiago,           pineros,         2,       description,        2,     2,                  10
+3,                       ramiro,           sanchez,         2,    3, description,        2,     2,                  10
+4,                      gustavo,                            2,    3, description,        2,     2,                  10
+5,                       filipe,             rojas,         2,    3, description,        2,     2,                  10

@@ -1,4 +1,5 @@
 defmodule BillCreator do
+  alias Bill.Item
   alias Bill.Bill
 
   defmodule BillStruct do
@@ -7,10 +8,10 @@ defmodule BillCreator do
       :clients_first_name,
       :clients_last_name,
       :id_client,
-      :item_code,
-      :item_description,
-      :item_quantity,
-      :item_price,
+      :code,
+      :description,
+      :quantity,
+      :price,
       :discount_percentage
     ]
   end
@@ -31,58 +32,75 @@ defmodule BillCreator do
   end
 
   def prepare_bill(bill_decode, filename) do
-    IO.inspect("##################################")
-    IO.inspect(get_values(bill_decode))
-    IO.inspect("##################################")
-    case get_values(bill_decode) do
-      [ok: bill_values] ->
-        bill_values
-          |> save_values(filename)
-      [error: error] ->
-        error_struct = %ErrorStruct{file_name: filename}
-        has_error(error, error_struct)
-    end
+    IO.inspect(prepare_header(bill_decode, filename))
+    prepare_header(bill_decode, filename)
   end
 
-  def get_values(bill_decode) do
+  def prepare_header(bill_decode, filename) do
     struct = %BillStruct{}
     bill_struct = List.delete(Map.keys(struct), :__struct__)
-    validate_file(bill_decode, Enum.take(bill_decode, 1), bill_struct)
+    validate_headers(bill_decode, Enum.take(bill_decode, 1), bill_struct, filename)
   end
 
-  def validate_file(bill_decode, header, correct_header) do
+  def validate_headers(bill_decode, header, correct_header, filename) do
     case header do
-      [ok: correct_header] ->
-        valid_header(bill_decode, header, correct_header)
+      [ok: _] ->
+        [ok: prepare_header] = header
+        ready_header = Enum.sort(Enum.map(Enum.map(prepare_header, &String.trim/1), &String.to_atom/1))
+        ready_correct_header = Enum.sort(correct_header)
+        valid_header(bill_decode, ready_header, ready_correct_header, filename)
       [] ->
-        [error: :empty_file]
+        error_struct = %ErrorStruct{file_name: filename}
+        has_error(:empty_file, error_struct)
     end
   end
 
-  def valid_header(bill_decode, header, correct_header) do
-    [ok: header_to_compare] = header
-    case header_to_compare == correct_header do
+  def valid_header(bill_decode, header, correct_header, filename) do
+    case header == correct_header do
       true ->
-        Enum.take(bill_decode, 100)
-          |> Keyword.get_values(:ok)
-          |> List.delete_at(0)
+        save_values_simple(bill_decode, filename)
       false ->
-        [error: :incorrect_header]
+        error_struct = %ErrorStruct{file_name: filename}
+        has_error(:incorrect_header, error_struct)
+    end
+  end
+
+  def take_data(bill_decode) do
+    Enum.take(bill_decode, 100)
+      |> Keyword.get_values(:ok)
+      |> List.delete_at(0)
+  end
+
+  def save_values_simple(bill_decode, filename) do
+    case validate_values(bill_decode, filename) do
+      [:ok] ->
+        Keyword.get_values(Enum.take(bill_decode, 100), :ok)
+          |> List.delete_at(0)
+          |> save_values(filename)
+      [] ->
+        error_struct = %ErrorStruct{file_name: filename}
+        has_error(:empty_file, error_struct)
+      [error: error] ->
+        [error: error]
+    end
+  end
+
+  def validate_values(bill_decode, filename) do
+    case Enum.count(Keyword.get_values(Enum.take(bill_decode, 100), :error)) >= 1 do
+      false ->
+        [:ok]
+      true ->
+        error_struct = %ErrorStruct{file_name: filename, explain_error: List.first(Keyword.get_values(Enum.take(bill_decode, 100), :error))}
+        has_error(:invalid_lines, error_struct)
     end
   end
 
   def save_values(values, filename) do
-    validate_bill(values, filename)
-  end
-
-  def validate_bill(values, filename) do
-    values_length = Enum.map(values, &length/1)
-    any_error = find_index(Enum.map(values_length, fn length_row -> length_row < 9 end), fn row_bad -> row_bad == true end)
-    if length(any_error) == 0 do
-      Enum.map(values, &save_bill/1)
-    else
-      error_struct = %ErrorStruct{file_name: filename, line_error: any_error}
-      has_error(:error, :invalid_lines)
+    case Enum.uniq(Keyword.keys(Enum.map(values, &save_bill/1))) do
+      [:ok] ->
+        [ok: "All bills created successfully"]
+      [error: error] ->
+        [error: error]
     end
   end
 
@@ -97,22 +115,23 @@ defmodule BillCreator do
     }
 
     data_item = %BillStruct{
-      item_code:           Enum.at(clean_bill, 4),
-      item_description:    Enum.at(clean_bill, 5),
-      item_quantity:       String.to_integer(Enum.at(clean_bill, 6)),
-      item_price:          String.to_integer(Enum.at(clean_bill, 7)),
+      code:           Enum.at(clean_bill, 4),
+      description:    Enum.at(clean_bill, 5),
+      quantity:       String.to_integer(Enum.at(clean_bill, 6)),
+      price:          String.to_integer(Enum.at(clean_bill, 7)),
       discount_percentage: String.to_integer(Enum.at(clean_bill, 8)),
     }
 
-    Bill.create_bill(Map.from_struct(data_bill))
-    Bill.create_item(Map.from_struct(data_item))
+    {:ok, bill} = Bill.create_bill(Map.from_struct(data_bill))
+    Item.create_item(Map.from_struct(data_item), bill)
   end
 
   def has_error(error_type, error_struct) do
     handle_error = fn
-      :empty_file       -> "The file #{error_struct.file_name}"
+      :empty_file       -> "The file #{error_struct.file_name} is empty, plis check it."
       :incorrect_header -> "The file #{error_struct.file_name} has an error with headers, plis check it."
-      :invalid_lines    -> "The file #{error_struct.file_name} has an error in line/s #{error_struct.line_error}, plis check it."
+      :invalid_lines    -> "The file #{error_struct.file_name} has an error #{error_struct.explain_error}, plis check it."
+      :global_error     -> "The file #{error_struct.file_name} has an error, plis check it."
     end
     [error: handle_error.(error_type)]
   end

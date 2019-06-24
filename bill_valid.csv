@@ -1,2 +1,3 @@
-number_bill, clients_first_name, clients_last_name, id_client, item_code, item_description, item_quantity, item_price, discount_percentage
-2, santiago, pineros, 2, 3, description of item 2, 2, 2, 2
+number_bill, clients_first_name, clients_last_name, id_client, code,      description, quantity,      price, discount_percentage
+53190,                   Daniel,            Campos,         3,    3,   procesador A10,        1,    1000000,                  10
+53191,                Sebastian,            Campos,         4,    4,     Hero Black 7,        1,    1500000,                  20

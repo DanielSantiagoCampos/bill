@@ -9,10 +9,11 @@ defmodule BillWeb.BillController do
 
   def csv(conn, %{"upload" => upload}) do
     %{"upload" => plug} = upload
+   #IO.inspect(BillCreator.create_bill(plug))
     case BillCreator.create_bill(plug) do
-      [ok: bill] ->
+      [ok: message] ->
         conn
-        |> put_flash(:info, "Bill created success")
+        |> put_flash(:info, message)
         |> redirect(to: Routes.bill_path(conn, :new))
       [error: error] ->
         conn
