@@ -9,10 +9,14 @@ defmodule BillWeb.BillController do
 
   def csv(conn, %{"upload" => upload}) do
     %{"upload" => plug} = upload
-    case BillCreator.create_bill(plug.path) do
+    case BillCreator.create_bill(plug) do
       [ok: bill] ->
         conn
         |> put_flash(:info, "Bill created success")
+        |> redirect(to: Routes.bill_path(conn, :new))
+      [error: error] ->
+        conn
+        |> put_flash(:info, error)
         |> redirect(to: Routes.bill_path(conn, :new))
     end
   end

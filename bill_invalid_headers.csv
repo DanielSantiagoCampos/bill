@@ -1,0 +1,2 @@
+number_bil, clients_first_name, clients_last_name, id_client, item_code, item_description, item_quantity, item_price, discount_percentage
+2,                    santiago,           pineros,         2,         3,      description,             2,          2,                  10
